@@ -1,0 +1,32 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Python if using server
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+
+# Logs
+*.log
+
+# Node (in case add tooling later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build / dist (future-proofing)
+dist/
+build/
+
+# Local environment files
+.env
+.env.local
