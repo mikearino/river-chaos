@@ -2,8 +2,6 @@ const config = {
     type: Phaser.AUTO,
     width: 1280,
     height: 720,
-    backgroundColor: '#222222',
-
     scene: {
         preload,
         create,
@@ -13,14 +11,30 @@ const config = {
 
 const game = new Phaser.Game(config);
 
+
+
 function preload() {
-   // not yet
-}
+    this.load.image('water', 'assets/images/water.png')
+};
 
 function create(){
-    console.log("Phaser scene created")
+    const centerX = this.sys.game.config.width / 2;
+    const centerY = this.sys.game.config.height / 2;
+
+    //sand/grass bg
+    this.cameras.main.setBackgroundColor(0xa8e518);
+
+    //water layer
+    water = this.add.tileSprite(
+        centerX,
+        centerY,
+        800,
+        720,
+        'water'
+    ).setOrigin(0.5, 0.5)
 }
 
 function update(time, delta) {
-    // nothing yet
+    // scroll water downward
+    water.tilePositionY += 0.2 * delta;
 }
