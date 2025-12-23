@@ -14,7 +14,6 @@ const SHORE_WIDTH = (SCREEN_WIDTH - RIVER_WIDTH ) / 2
 const RIGHT_SHORE_X = SHORE_WIDTH + RIVER_WIDTH
 const LEFT_SHORE_X = SHORE_WIDTH - SHORE_TILE_WIDTH
 
-
 const WATER_X = SCREEN_WIDTH / 2
 const WATER_Y = SCREEN_HEIGHT / 2
 
@@ -70,8 +69,8 @@ export default class GameScene extends Phaser.Scene {
      this.player = new Player(this, 400, 500, 'tube')
      this.player.setScale(1.5)
 
-    // rock array
-    this.rocks = [];
+    // rock group🤘
+    this.rocks = this.physics.add.group();
 
     // random rock spawner
     this.time.addEvent({
@@ -80,10 +79,15 @@ export default class GameScene extends Phaser.Scene {
       callback: () => {
         const x = Phaser.Math.Between(300, 900)
         const y = 900; // spawn offscreen below
-
         const rock = new Rock(this, x, y);
-        this.rocks.push(rock);
+        this.rocks.add(rock);
       }
+    })
+
+    // collision detection
+    this.physics.add.collider(this.player, this.rocks, () =>{
+      console.log('hit a rock!');
+      this.scene.restart();
     })
   }
 
@@ -94,13 +98,14 @@ export default class GameScene extends Phaser.Scene {
 
     // scroll water upward
     this.water.tilePositionY += WATER_SCROLL_SPEED * delta;
+    
     // scroll rocks upward
-    for (let i = this.rocks.length - 1; i >= 0; i--) {
-      const rock = this.rocks[i];
+    for (let i = this.rocks.getChildren().length - 1; i >= 0; i--) {
+      const rock = this.rocks.getChildren()[i];
       rock.update(delta)
         if (rock.y + rock.height < 0) {
         rock.destroy();
-        this.rocks.splice(i, 1);
+        this.rocks.remove(rock, true, true);
       }
     }
   }
