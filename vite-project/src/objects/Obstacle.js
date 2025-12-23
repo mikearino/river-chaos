@@ -1,6 +1,6 @@
 export default class Obstacle extends Phaser.GameObjects.Sprite {
   constructor (scene, x, y, textureKey, flip = false) {
-    super(this.scene, x, y, textureKey)
+    super(scene, x, y, textureKey)
     
     scene.add.existing(this);
 
@@ -9,5 +9,8 @@ export default class Obstacle extends Phaser.GameObjects.Sprite {
     if (flip) {
       this.setFlipX(true);
     }
+  }
+  update(delta) {
+    this.y -= 0.2 * delta
   }
 }

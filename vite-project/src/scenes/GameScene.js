@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import Obstacle from '../objects/Obstacle'
+import Rock from '../objects/Rock'
 
 const SCREEN_WIDTH = 1280
 const SCREEN_HEIGHT = 720
@@ -26,6 +27,7 @@ export default class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('water', '/assets/images/water.png')
     this.load.image('shore', '/assets/images/shore.png')
+    this.load.image('rock', '/assets/images/rock.png')
     }
     
   create(){
@@ -58,11 +60,18 @@ export default class GameScene extends Phaser.Scene {
         'shore'
     ).setOrigin(0,0)
     .setFlipX(true);
+
+    // rock array
+    this.rocks = [];
+    this.rock = new Rock(this, 400, 1100);
   }
+
+    
 
   update(time, delta) {
     // scroll water downward
     this.water.tilePositionY += WATER_SCROLL_SPEED * delta;
+    this.rock.update(delta)
   }
 }
 
