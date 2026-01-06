@@ -69,6 +69,15 @@ export default class GameScene extends Phaser.Scene {
      this.player = new Player(this, 400, 500, 'tube')
      this.player.setScale(1.5)
 
+    // scoring
+    this.score = 0;
+
+    // scoring display text
+    this.scoreText = this.add.text(20, 20, 'Score: 0', {
+      fontSize: '32px',
+      color: '#000'
+    });
+
     // rock group🤘
     this.rocks = this.physics.add.group();
 
