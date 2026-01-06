@@ -5,6 +5,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.setOrigin(0.5, 0.5);
+        this.health = 5;
+        this.hitCoolDown = false;
 
         if(flip) {
             this.setFlipX(true)

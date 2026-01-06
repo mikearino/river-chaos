@@ -78,6 +78,13 @@ export default class GameScene extends Phaser.Scene {
       color: '#000'
     });
 
+    // health text
+    this.healthText = this.add.text(20, 60, 'Lives: 5', {
+      fontSize: '32px',
+      color: '#000'
+    });
+
+
     // rock group🤘
     this.rocks = this.physics.add.group();
 
@@ -105,16 +112,51 @@ export default class GameScene extends Phaser.Scene {
     })
 
     // collision detection
-    this.physics.add.collider(this.player, this.rocks, () =>{
-      console.log('hit a rock!');
-      this.scene.start('GameOverScene', { score: this.score});
-    })
+    this.physics.add.collider(this.player, this.rocks, (player, rock) => {
+      if (!player.hitCooldown) {
+        player.health -= 1;
+        player.hitCooldown = true;
+
+        this.healthText.setText('Lives: ' + player.health);
+
+        // Brief invulnerability
+        this.time.delayedCall(1000, () => {
+          player.hitCooldown = false;
+        });
+
+        if (player.health <= 0) {
+          this.scene.start('GameOverScene', { score: this.score });
+        }
+      }
+    });
+    
   }
 
   update(time, delta) {
+
     //update player
     this.player.update(this.cursors, delta)
 
+    // Water boundaries
+    const riverLeft = SHORE_WIDTH;
+    const riverRight = SHORE_WIDTH + RIVER_WIDTH;
+
+    if (
+      this.player.x < riverLeft ||
+      this.player.x > riverRight
+    ) {
+      // Player on shore stop horizontal movement
+      this.player.body.setVelocityX(0);
+      this.player.x = Phaser.Math.Clamp(this.player.x, riverLeft, riverRight);
+    }
+
+    if (
+      this.player.y < -this.player.height ||
+      this.player.y > SCREEN_HEIGHT + this.player.height
+    ) {
+      // Off the screen vertically game over
+      this.scene.start('GameOverScene', { score: this.score });
+    }
 
     // scroll water upward
     this.water.tilePositionY += WATER_SCROLL_SPEED * delta;
