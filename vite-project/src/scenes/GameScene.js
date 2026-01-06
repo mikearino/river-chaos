@@ -82,15 +82,20 @@ export default class GameScene extends Phaser.Scene {
     this.rocks = this.physics.add.group();
 
     // random rock spawner
-    this.time.addEvent({
-      delay: 1000,
+    this.spawnDelay = 1000;
+    this.minSpawnDelay = 300;
+
+    this.spawnRocks = () => {
+      const x = Phaser.Math.Between(300, 900);
+      const y = 900;
+      const rock = new Rock(this, x, y);
+      this.rocks.add(rock);
+    };
+
+    this.spawnTimer = this.time.addEvent({
+      delay: this.spawnDelay,
       loop: true,
-      callback: () => {
-        const x = Phaser.Math.Between(300, 900)
-        const y = 900; // spawn offscreen below
-        const rock = new Rock(this, x, y);
-        this.rocks.add(rock);
-      }
+      callback: this.spawnRocks
     })
 
     // collision detection
@@ -113,6 +118,21 @@ export default class GameScene extends Phaser.Scene {
       const rock = this.rocks.getChildren()[i];
       rock.update(delta)
         if (rock.y + rock.height < 0) {
+        this.score += 1;
+        this.scoreText.setText('Score: ' + this.score);
+
+        if (this.score % 5 === 0 && this.spawnDelay > this.minSpawnDelay) {
+          this.spawnDelay -= 100;
+
+          this.spawnTimer.remove();
+
+          this.spawnTimer = this.time.addEvent({
+            delay: this.spawnDelay,
+            loop: true,
+            callback: this.spawnRocks
+          })
+        }
+
         rock.destroy();
         this.rocks.remove(rock, true, true);
       }
