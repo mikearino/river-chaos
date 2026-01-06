@@ -86,11 +86,17 @@ export default class GameScene extends Phaser.Scene {
     this.minSpawnDelay = 300;
 
     this.spawnRocks = () => {
-      const x = Phaser.Math.Between(300, 900);
-      const y = 900;
-      const rock = new Rock(this, x, y);
-      this.rocks.add(rock);
-    };
+      const burstChance = 0.2;
+      const isBurst = Math.random() < burstChance;
+      const rocksToSpawn = isBurst ? Phaser.Math.Between(2, 3) : 1;
+
+      for (let i = 0; i < rocksToSpawn; i++ ) {
+        const x = Phaser.Math.Between(300, 900);
+        const y = 900;
+        const rock = new Rock(this, x, y);
+        this.rocks.add(rock);
+      }
+    }
 
     this.spawnTimer = this.time.addEvent({
       delay: this.spawnDelay,
