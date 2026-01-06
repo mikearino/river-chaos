@@ -66,7 +66,7 @@ export default class GameScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // add player
-     this.player = new Player(this, 400, 500, 'tube')
+     this.player = new Player(this, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'tube')
      this.player.setScale(1.5)
 
     // scoring
@@ -107,7 +107,7 @@ export default class GameScene extends Phaser.Scene {
     // collision detection
     this.physics.add.collider(this.player, this.rocks, () =>{
       console.log('hit a rock!');
-      this.scene.restart();
+      this.scene.start('GameOverScene', { score: this.score});
     })
   }
 
