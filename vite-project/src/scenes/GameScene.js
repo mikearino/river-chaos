@@ -26,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.audio("mainBgm", "/assets/audio/main-music.mp3");
+    this.load.audio("collisionSound", "/assets/audio/thwack.ogg");
     this.load.image("water", "/assets/images/water.png");
     this.load.image("shore", "/assets/images/shore.png");
     this.load.image("rock", "/assets/images/rock.png");
@@ -51,6 +52,7 @@ export default class GameScene extends Phaser.Scene {
 
     //sand/grass bg
     this.cameras.main.setBackgroundColor(0xa8e518);
+
     //water layer
     this.water = this.add
       .tileSprite(WATER_X, WATER_Y, 800, 720, "water")
@@ -125,7 +127,10 @@ export default class GameScene extends Phaser.Scene {
       const rocksToSpawn = isBurst ? Phaser.Math.Between(2, 3) : 1;
 
       for (let i = 0; i < rocksToSpawn; i++) {
-        const x = Phaser.Math.Between(300, 900);
+        const x = Phaser.Math.Between(
+          RIGHT_SHORE_X - SHORE_TILE_WIDTH,
+          LEFT_SHORE_X + SHORE_TILE_WIDTH
+        );
         const y = 900;
         const rock = new Rock(this, x, y);
         this.rocks.add(rock);
@@ -153,10 +158,11 @@ export default class GameScene extends Phaser.Scene {
         return;
       }
 
+      this.sound.play("collisionSound");
       this.hearts[player.health].setVisible(false);
 
       const knockbackX = player.x < rock.x ? -200 : 200;
-      const knockbackY = -450;
+      const knockbackY = -250;
       player.body.setVelocity(knockbackX, knockbackY);
 
       this.tweens.add({
@@ -187,7 +193,6 @@ export default class GameScene extends Phaser.Scene {
     const riverRight = SHORE_WIDTH + RIVER_WIDTH;
 
     // On up key speed up row
-
     if (this.cursors.up.isDown) {
       if (this.player.anims.currentAnim?.key !== "row_fast") {
         this.player.play("row_fast");
@@ -198,10 +203,13 @@ export default class GameScene extends Phaser.Scene {
       }
     }
 
-    if (this.player.x < riverLeft || this.player.x > riverRight) {
-      // Player on shore stop horizontal movement
+    const halfWidth = this.player.displayWidth / 2;
+    const minX = SHORE_WIDTH + halfWidth;
+    const maxX = SHORE_WIDTH + RIVER_WIDTH - halfWidth;
+
+    if (this.player.x < minX || this.player.x > maxX) {
       this.player.body.setVelocityX(0);
-      this.player.x = Phaser.Math.Clamp(this.player.x, riverLeft, riverRight);
+      this.player.x = Phaser.Math.Clamp(this.player.x, minX, maxX);
     }
 
     if (
