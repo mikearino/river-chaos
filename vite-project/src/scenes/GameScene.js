@@ -66,16 +66,23 @@ export default class GameScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     //create animation for player
-      this.anims.create({
-      key: 'row',
-      frames: this.anims.generateFrameNumbers('rowboat', { start: 0, end: 3}),
+    this.anims.create({
+      key: 'row_slow',
+      frames: this.anims.generateFrameNumbers('rowboat', { start: 0, end: 3 }),
       frameRate: 8,
       repeat: -1
-     });
+    });
+
+    this.anims.create({
+      key: 'row_fast',
+      frames: this.anims.generateFrameNumbers('rowboat', { start: 0, end: 3 }),
+      frameRate: 20,
+      repeat: -1
+    });
 
     // add player
      this.player = new Player(this, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'rowboat')
-     this.player.play('row')
+     this.player.play('row_slow')
      this.player.setScale(1.5)
 
     // scoring
@@ -169,6 +176,19 @@ export default class GameScene extends Phaser.Scene {
     // Water boundaries
     const riverLeft = SHORE_WIDTH;
     const riverRight = SHORE_WIDTH + RIVER_WIDTH;
+
+    // On up key speed up row
+
+    if (this.cursors.up.isDown) {
+      if (this.player.anims.currentAnim?.key !== 'row_fast') {
+        this.player.play('row_fast');
+      }
+    } else {
+      if (this.player.anims.currentAnim?.key !== 'row_slow') {
+        this.player.play('row_slow');
+      }
+    }
+
 
     if (
       this.player.x < riverLeft ||
