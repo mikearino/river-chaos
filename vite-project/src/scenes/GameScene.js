@@ -28,6 +28,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('water', '/assets/images/water.png');
     this.load.image('shore', '/assets/images/shore.png');
     this.load.image('rock', '/assets/images/rock.png');
+    this.load.image('heart', '/assets/images/heart.png')
     this.load.spritesheet('rowboat', '/assets/images/boat.png', {frameWidth: 32, frameHeight: 32});
     }
     
@@ -94,11 +95,15 @@ export default class GameScene extends Phaser.Scene {
       color: '#000'
     });
 
-    // health text
-    this.healthText = this.add.text(20, 60, 'Lives: 5', {
-      fontSize: '32px',
-      color: '#000'
-    });
+    // hearts
+    this.hearts = [];
+
+    for (let i = 0; i < this.player.health; i++) {
+      const heart = this.add.image(25 + i * 40, 80, 'heart');
+      heart.setScrollFactor(0);
+      heart.setScale(0.75);
+      this.hearts.push(heart);
+    }
 
 
     // rock group🤘
@@ -134,7 +139,7 @@ export default class GameScene extends Phaser.Scene {
         player.health -= 1;
         player.hitCooldown = true;
 
-        this.healthText.setText('Lives: ' + player.health);
+        this.hearts[player.health].setVisible(false)
 
         //knockback on collision
         const knockbackX = player.x < rock.x ? -200 : 200;
