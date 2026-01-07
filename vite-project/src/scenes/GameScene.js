@@ -25,10 +25,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('water', '/assets/images/water.png')
-    this.load.image('shore', '/assets/images/shore.png')
-    this.load.image('rock', '/assets/images/rock.png')
-    this.load.image('tube', '/assets/images/tube.png')
+    this.load.image('water', '/assets/images/water.png');
+    this.load.image('shore', '/assets/images/shore.png');
+    this.load.image('rock', '/assets/images/rock.png');
+    this.load.spritesheet('rowboat', '/assets/images/boat.png', {frameWidth: 32, frameHeight: 32});
     }
     
   create(){
@@ -65,8 +65,17 @@ export default class GameScene extends Phaser.Scene {
     //setup inputs
     this.cursors = this.input.keyboard.createCursorKeys();
 
+    //create animation for player
+      this.anims.create({
+      key: 'row',
+      frames: this.anims.generateFrameNumbers('rowboat', { start: 0, end: 3}),
+      frameRate: 8,
+      repeat: -1
+     });
+
     // add player
-     this.player = new Player(this, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'tube')
+     this.player = new Player(this, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 'rowboat')
+     this.player.play('row')
      this.player.setScale(1.5)
 
     // scoring
