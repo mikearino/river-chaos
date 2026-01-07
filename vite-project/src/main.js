@@ -7,15 +7,12 @@ const config = {
   type: Phaser.AUTO,
   width: 1280,
   height: 720,
-  backgroundColor: '#a8e518',
+  backgroundColor: "#a8e518",
   scene: [StartScene, GameScene, GameOverScene],
   physics: {
-    default: 'arcade',
-    arcade: {debug:true}
-  }
-}
+    default: "arcade",
+    arcade: { debug: true },
+  },
+};
 
 new Phaser.Game(config);
-
-
-
