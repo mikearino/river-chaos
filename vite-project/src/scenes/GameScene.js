@@ -113,23 +113,43 @@ export default class GameScene extends Phaser.Scene {
 
     // collision detection
     this.physics.add.collider(this.player, this.rocks, (player, rock) => {
-      if (!player.hitCooldown) {
+      if (player.hitCooldown) return;
+      
         player.health -= 1;
         player.hitCooldown = true;
 
         this.healthText.setText('Lives: ' + player.health);
 
+        //knockback on collision
+        const knockbackX = player.x < rock.x ? -200 : 200;
+        const knockbackY = -450;
+        player.body.setVelocity(knockbackX, knockbackY);
+
+        //flash effect
+        this.tweens.add({
+          targets: player,
+          alpha: 0.3,
+          yoyo: true,
+          repeat: 5,
+          duration: 100
+        });
+
+        //Disable player collision for 1 sec
+        player.body.checkCollision.none = true;
+
         // Brief invulnerability
         this.time.delayedCall(1000, () => {
           player.hitCooldown = false;
+          player.setAlpha(1);
+          player.body.setVelocity(0, 0);
+          player.body.checkCollision.none = false;
         });
 
         if (player.health <= 0) {
           this.scene.start('GameOverScene', { score: this.score });
         }
-      }
-    });
-    
+      });
+
   }
 
   update(time, delta) {
