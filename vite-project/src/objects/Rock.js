@@ -6,7 +6,7 @@ export default class Rock extends Obstacle {
 
     scene.physics.add.existing(this);
     this.setImmovable(true);
-    this.body.setSize(this.width * 0.7, this.height * 0.7);
-    this.body.setOffset(this.width * 0.15, this.height * 0.15);
+    this.body.setSize(this.width * 0.6, this.height * 0.6);
+    this.body.setOffset(this.width * 0.15, this.height * 0.25);
   }
 }
