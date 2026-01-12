@@ -30,6 +30,10 @@ export default class GameScene extends Phaser.Scene {
     this.load.image("water", "/assets/images/water.png");
     this.load.image("shore", "/assets/images/shore.png");
     this.load.image("rock", "/assets/images/rock.png");
+    this.load.spritesheet("log", "/assets/images/log.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
     this.load.image("heart", "/assets/images/heart.png");
     this.load.spritesheet("rowboat", "/assets/images/boat.png", {
       frameWidth: 32,
@@ -82,6 +86,14 @@ export default class GameScene extends Phaser.Scene {
       key: "row_fast",
       frames: this.anims.generateFrameNumbers("rowboat", { start: 0, end: 3 }),
       frameRate: 20,
+      repeat: -1,
+    });
+
+    //log animation
+    this.anims.create({
+      key: "logSpin",
+      frames: this.anims.generateFrameNumbers("log", { start: 0, end: 3 }),
+      frameRate: 6,
       repeat: -1,
     });
 
