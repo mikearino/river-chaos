@@ -1,6 +1,7 @@
 import Phaser from "phaser";
-import Obstacle from "../objects/Obstacle";
-import Rock from "../objects/Rock";
+import Obstacle from "../objects/obstacles/Obstacle";
+import Rock from "../objects/obstacles/Rock";
+import Log from "../objects/obstacles/Log";
 import Player from "../objects/Player";
 
 const SCREEN_WIDTH = 1280;
@@ -126,74 +127,79 @@ export default class GameScene extends Phaser.Scene {
       this.hearts.push(heart);
     }
 
-    // rock group🤘
-    this.rocks = this.physics.add.group();
+    //add physics to obstacles
+    this.obstacles = this.physics.add.group();
 
     // random rock spawner
     this.spawnDelay = 1000;
     this.minSpawnDelay = 300;
 
-    this.spawnRocks = () => {
+    this.spawnObstacles = () => {
       const burstChance = 0.2;
       const isBurst = Math.random() < burstChance;
-      const rocksToSpawn = isBurst ? Phaser.Math.Between(2, 3) : 1;
+      const obstaclesToSpawn = isBurst ? Phaser.Math.Between(2, 3) : 1;
 
-      for (let i = 0; i < rocksToSpawn; i++) {
+      for (let i = 0; i < obstaclesToSpawn; i++) {
         const x = Phaser.Math.Between(
           RIGHT_SHORE_X - SHORE_TILE_WIDTH,
           LEFT_SHORE_X + SHORE_TILE_WIDTH
         );
         const y = 900;
-        const rock = new Rock(this, x, y);
-        this.rocks.add(rock);
+        const useLog = Math.random() < 0.15;
+        const obstacle = useLog ? new Log(this, x, y) : new Rock(this, x, y);
+        this.obstacles.add(obstacle);
       }
     };
 
     this.spawnTimer = this.time.addEvent({
       delay: this.spawnDelay,
       loop: true,
-      callback: this.spawnRocks,
+      callback: this.spawnObstacles,
     });
 
     // collision detection
-    this.physics.add.collider(this.player, this.rocks, (player, rock) => {
-      if (player.hitCooldown) return;
+    this.physics.add.collider(
+      this.player,
+      this.obstacles,
+      (player, obstacles) => {
+        if (player.hitCooldown) return;
 
-      player.health -= 1;
-      player.hitCooldown = true;
+        player.health -= 1;
+        player.hitCooldown = true;
 
-      if (player.health <= 0) {
-        if (this.bgm) {
-          this.bgm.stop();
+        if (player.health <= 0) {
+          if (this.bgm) {
+            this.bgm.stop();
+          }
+          this.scene.start("GameOverScene", { score: this.score });
+          return;
         }
-        this.scene.start("GameOverScene", { score: this.score });
-        return;
+
+        this.sound.play("collisionSound");
+        this.hearts[player.health].setVisible(false);
+
+        const knockbackX = player.x < obstacles.x ? -200 : 200;
+        const knockbackY = -250;
+        player.body.setVelocity(knockbackX, knockbackY);
+
+        this.tweens.add({
+          targets: player,
+          alpha: 0.3,
+          yoyo: true,
+          repeat: 5,
+          duration: 100,
+        });
+
+        player.body.checkCollision.none = true;
+
+        this.time.delayedCall(1000, () => {
+          player.hitCooldown = false;
+          player.setAlpha(1);
+          player.body.setVelocity(0, 0);
+          player.body.checkCollision.none = false;
+        });
       }
-
-      this.sound.play("collisionSound");
-      this.hearts[player.health].setVisible(false);
-
-      const knockbackX = player.x < rock.x ? -200 : 200;
-      const knockbackY = -250;
-      player.body.setVelocity(knockbackX, knockbackY);
-
-      this.tweens.add({
-        targets: player,
-        alpha: 0.3,
-        yoyo: true,
-        repeat: 5,
-        duration: 100,
-      });
-
-      player.body.checkCollision.none = true;
-
-      this.time.delayedCall(1000, () => {
-        player.hitCooldown = false;
-        player.setAlpha(1);
-        player.body.setVelocity(0, 0);
-        player.body.checkCollision.none = false;
-      });
-    });
+    );
   }
 
   update(time, delta) {
@@ -240,28 +246,28 @@ export default class GameScene extends Phaser.Scene {
     // scroll water upward
     this.water.tilePositionY += WATER_SCROLL_SPEED * delta;
 
-    // scroll rocks upward
-    for (let i = this.rocks.getChildren().length - 1; i >= 0; i--) {
-      const rock = this.rocks.getChildren()[i];
-      rock.update(delta);
-      if (rock.y + rock.height < 0) {
+    // scroll obstacles upward
+    for (let i = this.obstacles.getChildren().length - 1; i >= 0; i--) {
+      const obstacle = this.obstacles.getChildren()[i];
+      obstacle.update(delta);
+      if (obstacle.y + obstacle.height < 0) {
         this.score += 1;
         this.scoreText.setText("Score: " + this.score);
 
         if (this.score % 5 === 0 && this.spawnDelay > this.minSpawnDelay) {
-          this.spawnDelay -= 100;
+          this.spawnDelay = Math.max(this.spawnDelay - 100, this.minSpawnDelay);
 
           this.spawnTimer.remove();
 
           this.spawnTimer = this.time.addEvent({
             delay: this.spawnDelay,
             loop: true,
-            callback: this.spawnRocks,
+            callback: this.spawnObstacles,
           });
         }
 
-        rock.destroy();
-        this.rocks.remove(rock, true, true);
+        obstacle.destroy();
+        this.obstacles.remove(obstacle, true, true);
       }
     }
   }
