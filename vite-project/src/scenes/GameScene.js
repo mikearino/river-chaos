@@ -111,6 +111,13 @@ export default class GameScene extends Phaser.Scene {
     // scoring
     this.score = 0;
 
+    // start spawn
+    this.maxObstaclesPerSpawn = 1;
+    this.spawnDelay = 1000;
+    this.minSpawnDelay = 300;
+    this.maxObstaclesPerSpawn = 2;
+    this.lastScoreUpdate = -1;
+
     // scoring display text
     this.scoreText = this.add.text(20, 20, "Score: 0", {
       fontSize: "32px",
@@ -130,21 +137,24 @@ export default class GameScene extends Phaser.Scene {
     //add physics to obstacles
     this.obstacles = this.physics.add.group();
 
-    // random rock spawner
+    // random object spawner
     this.spawnDelay = 1000;
     this.minSpawnDelay = 300;
 
     this.spawnObstacles = () => {
       const burstChance = 0.2;
       const isBurst = Math.random() < burstChance;
-      const obstaclesToSpawn = isBurst ? Phaser.Math.Between(2, 3) : 1;
+      const obstaclesToSpawn = isBurst
+        ? Phaser.Math.Between(2, this.maxObstaclesPerSpawn)
+        : 1;
 
       for (let i = 0; i < obstaclesToSpawn; i++) {
         const x = Phaser.Math.Between(
           RIGHT_SHORE_X - SHORE_TILE_WIDTH,
           LEFT_SHORE_X + SHORE_TILE_WIDTH
         );
-        const y = 900;
+        const baseY = 900;
+        const y = baseY + Phaser.Math.Between(-20, 20);
         const useLog = Math.random() < 0.15;
         const obstacle = useLog ? new Log(this, x, y) : new Rock(this, x, y);
         this.obstacles.add(obstacle);
@@ -200,6 +210,25 @@ export default class GameScene extends Phaser.Scene {
         });
       }
     );
+
+    this.physics.add.collider(this.obstacles, this.obstacles, (a, b) => {
+      // Only attach if one is a Log and one is a Rock
+      const isLogAndRock =
+        (a instanceof Log && b instanceof Rock) ||
+        (a instanceof Rock && b instanceof Log);
+
+      if (isLogAndRock) {
+        const log = a instanceof Log ? a : b;
+        const rock = a instanceof Rock ? a : b;
+
+        // Attach only if not already attached
+        if (!log.attachedTo) {
+          log.attachedTo = rock;
+          log.body.setVelocity(0); // Clear movement
+          log.body.setImmovable(true); // Optional: prevent physics interference
+        }
+      }
+    });
   }
 
   update(time, delta) {
@@ -254,16 +283,28 @@ export default class GameScene extends Phaser.Scene {
         this.score += 1;
         this.scoreText.setText("Score: " + this.score);
 
-        if (this.score % 5 === 0 && this.spawnDelay > this.minSpawnDelay) {
-          this.spawnDelay = Math.max(this.spawnDelay - 100, this.minSpawnDelay);
+        if (this.score % 10 === 0 && this.lastScoreUpdate !== this.score) {
+          this.lastScoreUpdate = this.score;
 
-          this.spawnTimer.remove();
+          //increase how many obstacles spawn together
+          if (this.score % 20 === 0) {
+            this.maxObstaclesPerSpawn += 1;
+          }
 
-          this.spawnTimer = this.time.addEvent({
-            delay: this.spawnDelay,
-            loop: true,
-            callback: this.spawnObstacles,
-          });
+          //decrease delay between spawns
+          if (this.spawnDelay > this.minSpawnDelay) {
+            this.spawnDelay = Math.max(
+              this.spawnDelay - 100,
+              this.minSpawnDelay
+            );
+
+            this.spawnTimer.remove();
+            this.spawnTimer = this.time.addEvent({
+              delay: this.spawnDelay,
+              loop: true,
+              callback: this.spawnObstacles,
+            });
+          }
         }
 
         obstacle.destroy();
