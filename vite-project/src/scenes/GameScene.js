@@ -181,7 +181,7 @@ export default class GameScene extends Phaser.Scene {
           if (this.bgm) {
             this.bgm.stop();
           }
-          this.scene.start("HighScoreScene", { score: this.score });
+          this.scene.start("LeaderBoardScene", { score: this.score });
           return;
         }
 
@@ -269,7 +269,7 @@ export default class GameScene extends Phaser.Scene {
       }
 
       // Off the screen vertically game over
-      this.scene.start("HighScoreScene", { score: this.score });
+      this.scene.start("LeaderBoardScene", { score: this.score });
     }
 
     // scroll water upward
