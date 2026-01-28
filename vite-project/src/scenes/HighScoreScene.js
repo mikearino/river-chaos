@@ -6,9 +6,9 @@ export default class highScoreScene extends Phaser.Scene {
     super("HighScoreScene");
   }
 
-  init(data) {
+  async init(data) {
     this.currentScore = data.score || 0;
-    this.highScore = getHighscore();
+    this.highScore = await getHighscore();
 
     if (this.currentScore > this.highScore) {
       this.highScore = this.currentScore;

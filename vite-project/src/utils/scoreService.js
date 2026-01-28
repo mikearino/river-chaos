@@ -7,6 +7,6 @@ export async function saveScore(score) {
   }
 }
 
-export async function getHighscore(params) {
+export async function getHighscore() {
   return parseInt(localStorage.getItem(LOCAL_KEY) || "0", 10);
 }
