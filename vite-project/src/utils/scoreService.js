@@ -1,12 +1,17 @@
-const LOCAL_KEY = "highScore";
+const LOCAL_KEY = "leaderboard";
 
-export async function saveScore(score) {
-  const current = parseInt(localStorage.getItem(LOCAL_KEY) || "0", 10);
-  if (score > current) {
-    localStorage.setItem(LOCAL_KEY, score);
-  }
+export async function saveScore(score, initials) {
+  const entry = { score, initials, date: Date.now() };
+
+  const stored = JSON.parse(localStorage.getItem(LOCAL_KEY) || "[]");
+
+  stored.push(entry);
+
+  const topTen = stored.sort((a, b) => b.score - a.score).slice(0, 10);
+
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(topTen));
 }
 
-export async function getHighscore() {
-  return parseInt(localStorage.getItem(LOCAL_KEY) || "0", 10);
+export async function getHighScores() {
+  return JSON.parse(localStorage.getItem(LOCAL_KEY) || "[]");
 }
