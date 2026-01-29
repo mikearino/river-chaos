@@ -2,7 +2,7 @@ import Phaser, { Physics } from "phaser";
 import GameScene from "./scenes/GameScene";
 import StartScene from "./scenes/StartScene";
 import GameOverScene from "./scenes/GameOverScene";
-import LeaderboardScoreScene from "./scenes/LeaderBoardScene";
+import LeaderboardScoreScene from "./scenes/LeaderboardScene";
 
 const config = {
   type: Phaser.AUTO,
