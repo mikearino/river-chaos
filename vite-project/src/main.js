@@ -12,7 +12,7 @@ const config = {
   scene: [StartScene, GameScene, GameOverScene, LeaderboardScoreScene],
   physics: {
     default: "arcade",
-    // arcade: { debug: true },
+    arcade: { debug: true },
   },
 };
 

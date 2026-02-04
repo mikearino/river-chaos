@@ -103,7 +103,7 @@ export default class GameScene extends Phaser.Scene {
       this,
       SCREEN_WIDTH / 2,
       SCREEN_HEIGHT / 2,
-      "rowboat"
+      "rowboat",
     );
     this.player.play("row_slow");
     this.player.setScale(1.5);
@@ -151,7 +151,7 @@ export default class GameScene extends Phaser.Scene {
       for (let i = 0; i < obstaclesToSpawn; i++) {
         const x = Phaser.Math.Between(
           RIGHT_SHORE_X - SHORE_TILE_WIDTH,
-          LEFT_SHORE_X + SHORE_TILE_WIDTH
+          LEFT_SHORE_X + SHORE_TILE_WIDTH,
         );
         const baseY = 900;
         const y = baseY + Phaser.Math.Between(-20, 20);
@@ -208,7 +208,7 @@ export default class GameScene extends Phaser.Scene {
           player.body.setVelocity(0, 0);
           player.body.checkCollision.none = false;
         });
-      }
+      },
     );
 
     this.physics.add.collider(this.obstacles, this.obstacles, (a, b) => {
@@ -295,7 +295,7 @@ export default class GameScene extends Phaser.Scene {
           if (this.spawnDelay > this.minSpawnDelay) {
             this.spawnDelay = Math.max(
               this.spawnDelay - 100,
-              this.minSpawnDelay
+              this.minSpawnDelay,
             );
 
             this.spawnTimer.remove();
