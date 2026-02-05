@@ -96,7 +96,10 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     // Allow only 3 uppercase letters.
     input.addEventListener("input", () => {
-      input.value = input.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3);
+      input.value = input.value
+        .toUpperCase()
+        .replace(/[^A-Z]/g, "")
+        .slice(0, 3);
     });
 
     input.addEventListener("keydown", (event) => {
