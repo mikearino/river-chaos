@@ -98,6 +98,9 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    //store run time for metrics
+    this.runStartTime = this.time.now;
+
     // add player
     this.player = new Player(
       this,
@@ -181,7 +184,8 @@ export default class GameScene extends Phaser.Scene {
           if (this.bgm) {
             this.bgm.stop();
           }
-          this.scene.start("LeaderboardScene", { score: this.score });
+          const duration = this.time.now - this.runStartTime;
+          this.scene.start("LeaderboardScene", { score: this.score, duration });
           return;
         }
 
@@ -268,8 +272,10 @@ export default class GameScene extends Phaser.Scene {
         this.bgm.stop();
       }
 
+      const duration = this.time.now - this.runStartTime;
+
       // Off the screen vertically game over
-      this.scene.start("LeaderboardScene", { score: this.score });
+      this.scene.start("LeaderboardScene", { score: this.score, duration });
     }
 
     // scroll water upward

@@ -16,9 +16,11 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   init(data) {
     this.currentScore = data.score || 0;
+    this.duration = data.duration || 0;
   }
 
   async create() {
+    console.log("Run duration:", this.duration);
     // Reuse the game-over track in this scene, but remove any existing tracks first.
     const existingMainMusic = this.sound.get("mainBgm");
     if (existingMainMusic) {
