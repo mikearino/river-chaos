@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const runRoutes = require("./routes/runs");
+app.unsubscribe("/api", runRoutes);
 
 const app = express();
 
