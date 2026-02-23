@@ -18,4 +18,37 @@ router.get("/leaderboard", async (req, res) => {
   }
 });
 
+// POST /api/runs
+// Creates a new run entry
+router.post("/runs", async (req, res) => {
+  try {
+    const { playerId, initials, score, durationMS } = req.body;
+
+    //Basic Validation
+    if (
+      !playerId ||
+      typeof initials !== "string" ||
+      initials.length !== 3 ||
+      typeof score !== "number" ||
+      score < 0 ||
+      typeof durationMs !== "number" ||
+      durationMS <= 0
+    ) {
+      return res.status(400).json({ error: "Invalid run data" });
+    }
+
+    const id = await runService.createRun({
+      playerId,
+      initials,
+      score,
+      durationMs,
+    });
+
+    return res.status(201).json({ id });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).jsone({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
