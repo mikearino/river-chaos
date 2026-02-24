@@ -22,7 +22,14 @@ router.get("/leaderboard", async (req, res) => {
 // Creates a new run entry
 router.post("/runs", async (req, res) => {
   try {
-    const { playerId, initials, score, durationMS } = req.body;
+    const { playerId, initials, score, durationMs } = req.body;
+
+    console.log("Types:", {
+      playerId: typeof playerId,
+      initials: typeof initials,
+      score: typeof score,
+      durationMs: typeof durationMs,
+    });
 
     //Basic Validation
     if (
@@ -32,7 +39,7 @@ router.post("/runs", async (req, res) => {
       typeof score !== "number" ||
       score < 0 ||
       typeof durationMs !== "number" ||
-      durationMS <= 0
+      durationMs <= 0
     ) {
       return res.status(400).json({ error: "Invalid run data" });
     }
@@ -47,7 +54,7 @@ router.post("/runs", async (req, res) => {
     return res.status(201).json({ id });
   } catch (error) {
     console.error(error);
-    return res.status(500).jsone({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

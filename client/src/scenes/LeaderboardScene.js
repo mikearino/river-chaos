@@ -1,5 +1,7 @@
+import { createRun } from "../api/api";
+import { getOrCreatePlayerId } from "../utils/playerId";
+import { getLeaderboard } from "../api/api";
 import Phaser from "phaser";
-import { getHighScores, saveScore } from "../utils/scoreService";
 
 export default class LeaderboardScene extends Phaser.Scene {
   constructor() {
@@ -16,11 +18,11 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   init(data) {
     this.currentScore = data.score || 0;
-    this.duration = data.duration || 0;
+    this.currentDuration = data.duration || 0;
   }
 
   async create() {
-    console.log("Run duration:", this.duration);
+    console.log("Run duration:", this.currentDuration);
     // Reuse the game-over track in this scene, but remove any existing tracks first.
     const existingMainMusic = this.sound.get("mainBgm");
     if (existingMainMusic) {
@@ -134,7 +136,27 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.isSubmitting = true;
     this.submitHintText?.setText("Saving...");
-    await saveScore(this.currentScore, initials);
+
+    const playerId = getOrCreatePlayerId();
+
+    console.log("Submitting run:", {
+      playerId,
+      initials,
+      score: this.currentScore,
+      durationMs: this.currentDuration,
+    });
+
+    try {
+      await createRun({
+        playerId,
+        initials,
+        score: this.currentScore,
+        durationMs: this.currentDuration,
+      });
+    } catch (error) {
+      console.error("Failed to save run:", error);
+    }
+
     this.clearEntryUI();
     this.showLeaderboard();
   }
@@ -162,7 +184,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     // Safety: clean up entry UI before drawing leaderboard.
     this.clearEntryUI();
 
-    const scores = await getHighScores();
+    const scores = await getLeaderboard();
 
     this.add
       .text(640, 260, "Leaderboard", {

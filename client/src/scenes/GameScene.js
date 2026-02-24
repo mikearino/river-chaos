@@ -1,3 +1,6 @@
+import { createRun } from "../api/api";
+import { getOrCreatePlayerId } from "../utils/playerId";
+
 import Phaser from "phaser";
 import Obstacle from "../objects/obstacles/Obstacle";
 import Rock from "../objects/obstacles/Rock";
@@ -185,6 +188,9 @@ export default class GameScene extends Phaser.Scene {
             this.bgm.stop();
           }
           const duration = this.time.now - this.runStartTime;
+
+          const player_id = getOrCreatePlayerId();
+
           this.scene.start("LeaderboardScene", { score: this.score, duration });
           return;
         }
