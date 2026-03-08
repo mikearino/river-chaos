@@ -7,7 +7,9 @@ const runService = require("../services/runService");
 
 router.get("/leaderboard", async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
+    // Parse limit from query and cap it to prevent large leaderboard queries
+    let limit = parseInt(req.query.limit) || 10;
+    limit = Math.min(limit, 50);
 
     const leaderboard = await runService.getLeaderboard(limit);
 
