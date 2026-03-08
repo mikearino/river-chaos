@@ -1,4 +1,4 @@
-import { getHighScores } from "../utils/scoreService";
+import { getLeaderboard } from "../api/api";
 
 export default class StartScene extends Phaser.Scene {
   constructor() {
@@ -97,7 +97,7 @@ export default class StartScene extends Phaser.Scene {
   }
 
   async showHighScores() {
-    const scores = await getHighScores();
+    const scores = await getLeaderboard();
 
     //clear when toggled
     this.scoreTexts = [];
