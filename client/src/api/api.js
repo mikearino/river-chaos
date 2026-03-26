@@ -1,6 +1,6 @@
 // Centralized API client for backend communication
 // Abstracts fetch calls away from game scenes.
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 // Fetch runs sorted by score (descending)
 export async function getLeaderboard(limit = 10) {
