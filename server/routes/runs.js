@@ -26,13 +26,6 @@ router.post("/runs", async (req, res) => {
   try {
     const { playerId, initials, score, durationMs } = req.body;
 
-    console.log("Types:", {
-      playerId: typeof playerId,
-      initials: typeof initials,
-      score: typeof score,
-      durationMs: typeof durationMs,
-    });
-
     //Basic Validation
     if (
       !playerId ||

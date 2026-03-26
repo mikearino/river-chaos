@@ -22,7 +22,6 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   async create() {
-    console.log("Run duration:", this.currentDuration);
     // Reuse the game-over track in this scene, but remove any existing tracks first.
     const existingMainMusic = this.sound.get("mainBgm");
     if (existingMainMusic) {
@@ -138,13 +137,6 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.submitHintText?.setText("Saving...");
 
     const playerId = getOrCreatePlayerId();
-
-    console.log("Submitting run:", {
-      playerId,
-      initials,
-      score: this.currentScore,
-      durationMs: this.currentDuration,
-    });
 
     try {
       await createRun({
