@@ -4,7 +4,6 @@ const runService = require("../services/runService");
 
 // GET /api/leaderboard
 // Returns top runs sorted by score (highest first).
-
 router.get("/leaderboard", async (req, res) => {
   try {
     // Parse limit from query and cap it to prevent large leaderboard queries
@@ -14,6 +13,21 @@ router.get("/leaderboard", async (req, res) => {
     const leaderboard = await runService.getLeaderboard(limit);
 
     res.json(leaderboard);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+//GET /api/playerstats
+//Returns stats for a specific player
+router.get("/players/:playerId/stats", async (req, res) => {
+  try {
+    const { playerId } = req.params;
+
+    const playerstats = await runService.getPlayerStas(playerId);
+
+    res.json(playerstats);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

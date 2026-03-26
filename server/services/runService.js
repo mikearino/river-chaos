@@ -23,31 +23,49 @@ async function createRun({ playerId, initials, score, durationMs }) {
 async function getLeaderboard(limit = 10) {
   const [rows] = await pool.query(
     `
-        SELECT r.initials, r.score, r.player_id, r.created_at
-        FROM runs r
-        JOIN (
-          SELECT player_id, MAX(score) AS best_score
-          FROM runs
-          GROUP BY player_id
-        ) best
-          ON r.player_id = best.player_id
+    SELECT r.initials, r.score, r.player_id, r.created_at
+    FROM runs r
+    JOIN (
+      SELECT player_id, MAX(score) AS best_score
+      FROM runs
+      GROUP BY player_id
+    ) best
+      ON r.player_id = best.player_id
         AND r.score = best.best_score
-        WHERE r.created_at = (
-          SELECT MIN(created_at)
-          FROM runs
-          WHERE player_id = r.player_id
-            AND score = r.score
-        )
-        ORDER BY r.score DESC
-        LIMIT ?;
-        `,
+    WHERE r.created_at = (
+      SELECT MIN(created_at)
+        FROM runs
+        WHERE player_id = r.player_id
+        AND score = r.score
+    )
+    ORDER BY r.score DESC
+    LIMIT ?;
+    `,
     [limit],
   );
 
   return rows;
 }
 
+async function getPlayerStats(playerId) {
+  const [rows] = await pool.query(
+    `
+    SELECT
+        COUNT(*) AS total_runs,
+        MAX(score) AS best_score,
+        AVG(score) AS average_score,
+        SUM(duration_ms) AS total_playtime
+    FROM runs
+    WHERE player_id = ?
+    `,
+    [playerId],
+  );
+
+  return rows[0];
+}
+
 module.exports = {
   createRun,
   getLeaderboard,
+  getPlayerStats,
 };
