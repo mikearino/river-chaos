@@ -40,11 +40,10 @@ router.post("/runs", async (req, res) => {
   try {
     const { playerId, initials, score, durationMs } = req.body;
 
-    //Basic Validation
+    //Run and Initials Validation
     if (
       !playerId ||
       typeof initials !== "string" ||
-      initials.length !== 3 ||
       typeof score !== "number" ||
       score < 0 ||
       typeof durationMs !== "number" ||
@@ -53,9 +52,15 @@ router.post("/runs", async (req, res) => {
       return res.status(400).json({ error: "Invalid run data" });
     }
 
+    const normalizedInitials = initials.toUpperCase();
+
+    if (!/^[A-Z]{3}$/.test(normalizedInitials)) {
+      return res.status(400).json({ error: "Invalid initials format" });
+    }
+
     const id = await runService.createRun({
       playerId,
-      initials,
+      initials: normalizedInitials,
       score,
       durationMs,
     });
