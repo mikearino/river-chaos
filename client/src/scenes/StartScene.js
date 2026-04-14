@@ -74,6 +74,15 @@ export default class StartScene extends Phaser.Scene {
       this.hideStartText();
       this.loadAndCycle();
     });
+
+    fetch("http://localhost:3000/api/leaderboard")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Leaderboard:", data);
+      })
+      .catch((err) => {
+        console.error("API error:", err);
+      });
   }
 
   hideStartText() {
