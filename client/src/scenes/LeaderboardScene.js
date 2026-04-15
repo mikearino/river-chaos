@@ -136,21 +136,21 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.isSubmitting = true;
     this.submitHintText?.setText("Saving...");
 
-    const playerId = getOrCreatePlayerId();
-
     try {
       await createRun({
-        playerId,
+        playerId: getOrCreatePlayerId(),
         initials,
         score: this.currentScore,
         durationMs: this.currentDuration,
       });
-    } catch (error) {
-      console.error("Failed to save run:", error);
-    }
 
-    this.clearEntryUI();
-    this.showLeaderboard();
+      this.clearEntryUI();
+      this.showLeaderboard();
+    } catch (error) {
+      console.error(error);
+      this.isSubmitting = false;
+      this.submitHintText?.setText("Save failed. Press ENTER to try again");
+    }
   }
 
   clearEntryUI() {
