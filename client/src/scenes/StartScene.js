@@ -75,8 +75,7 @@ export default class StartScene extends Phaser.Scene {
       this.loadAndCycle();
     });
 
-    fetch("http://localhost:3000/api/leaderboard")
-      .then((res) => res.json())
+    getLeaderboard()
       .then((data) => {
         console.log("Leaderboard:", data);
       })
