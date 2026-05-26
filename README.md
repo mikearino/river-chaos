@@ -1,10 +1,8 @@
 # River Chaos
 
-**River Chaos** is a fast-paced browser arcade game built with Phaser.js.  
-Navigate a treacherous river, dodge obstacles, and survive as long as possible.
+River Chaos is a fast-paced browser arcade game built with Phaser.js.
 
-🕹️ **Play Now:**  
-https://d1vskmi94pi261.cloudfront.net
+🕹️ **Play Now:** [riverchaos.com](https://www.riverchaos.com)
 
 ---
 
