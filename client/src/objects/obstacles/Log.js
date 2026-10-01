@@ -11,7 +11,11 @@ export default class Log extends Obstacle {
       this.setFlipX(true);
     }
 
-    this.setScale(2);
+    if (Math.random() < 0.5) {
+      this.setFlipY(true);
+    }
+
+    this.setScale(1.6);
     this.body.setSize(this.width * 0.6, this.height * 0.6);
     this.body.setOffset(this.width * 0.15, this.height * 0.25);
 

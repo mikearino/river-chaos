@@ -45,6 +45,10 @@ export default class GameScene extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 32,
     });
+    this.load.spritesheet("grass", "/assets/images/grass.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
   }
 
   create() {
@@ -77,6 +81,58 @@ export default class GameScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setFlipX(true);
 
+    // grass animation
+    this.anims.create({
+      key: "grassWave",
+      frames: this.anims.generateFrameNumbers("grass", {
+        start: 0,
+        end: 3,
+      }),
+      frameRate: 3,
+      repeat: -1,
+    });
+
+    // animated grass
+    this.grass = this.add.group();
+
+    for (let y = -16; y < SCREEN_HEIGHT + 32; y += 32) {
+      // left bank
+      for (let x = -16; x < LEFT_SHORE_X + 16; x += 32) {
+        const grass = this.add.sprite(x, y, "grass");
+        grass.setScale(1.7);
+        grass.play("grassWave");
+        grass.anims.setProgress(Math.random());
+
+        this.grass.add(grass);
+      }
+
+      // right bank
+      for (
+        let x = RIGHT_SHORE_X + SHORE_TILE_WIDTH;
+        x < SCREEN_WIDTH + 32;
+        x += 32
+      ) {
+        const grass = this.add.sprite(x, y, "grass");
+        grass.setScale(1.7);
+        grass.play("grassWave");
+        grass.anims.setProgress(Math.random());
+
+        this.grass.add(grass);
+      }
+    }
+
+    this.time.addEvent({
+      delay: 3000,
+      loop: true,
+      callback: () => {
+        const windSpeed = Phaser.Math.FloatBetween(0.001, 2);
+
+        this.grass.getChildren().forEach((grass) => {
+          grass.anims.timeScale = windSpeed;
+        });
+      },
+    });
+
     //setup inputs
     this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -100,6 +156,14 @@ export default class GameScene extends Phaser.Scene {
       key: "logSpin",
       frames: this.anims.generateFrameNumbers("log", { start: 0, end: 3 }),
       frameRate: 6,
+      repeat: -1,
+    });
+
+    // grass animation
+    this.anims.create({
+      key: "grassWave",
+      frames: this.anims.generateFrameNumbers("grass", { start: 0, end: 3 }),
+      frameRate: 4,
       repeat: -1,
     });
 
