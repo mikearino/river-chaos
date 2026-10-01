@@ -33,7 +33,9 @@ export default class GameScene extends Phaser.Scene {
     this.load.audio("collisionSound", "/assets/audio/thwack.ogg");
     this.load.image("water", "/assets/images/water.png");
     this.load.image("shore", "/assets/images/shore.png");
-    this.load.image("rock", "/assets/images/rock.png");
+    for (let i = 1; i <= 12; i++) {
+      this.load.image(`rock${i}`, `/assets/images/rocks/rock_${i}.png`);
+    }
     this.load.spritesheet("log", "/assets/images/log.png", {
       frameWidth: 32,
       frameHeight: 32,
