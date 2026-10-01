@@ -272,8 +272,11 @@ export default class GameScene extends Phaser.Scene {
           targets: player,
           alpha: 0.3,
           yoyo: true,
-          repeat: 5,
+          repeat: 4,
           duration: 100,
+          onComplete: () => {
+            player.setAlpha(1);
+          },
         });
 
         player.body.checkCollision.none = true;
@@ -361,7 +364,7 @@ export default class GameScene extends Phaser.Scene {
         this.score += 1;
         this.scoreText.setText("Score: " + this.score);
 
-        if (this.score % 10 === 0 && this.lastScoreUpdate !== this.score) {
+        if (this.score % 5 === 0 && this.lastScoreUpdate !== this.score) {
           this.lastScoreUpdate = this.score;
 
           //increase how many obstacles spawn together
@@ -372,7 +375,7 @@ export default class GameScene extends Phaser.Scene {
           //decrease delay between spawns
           if (this.spawnDelay > this.minSpawnDelay) {
             this.spawnDelay = Math.max(
-              this.spawnDelay - 100,
+              this.spawnDelay - 50,
               this.minSpawnDelay,
             );
 
