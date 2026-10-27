@@ -92,6 +92,29 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    this.grassColors = [
+      0xffffff, // 0–49: Original green
+      0x7fff00, // 50–99: Lime
+      0xffff00, // 100–149: Yellow
+      0xff8800, // 150–199: Orange
+      0xff1493, // 200–249: Hot pink
+      0x9932cc, // 250–299: Purple
+      0x0088ff, // 300–349: Electric blue
+      0x00ffcc, // 350–399: Turquoise
+      0xff0033, // 400–449: Neon red
+      0xff00ff, // 450–499: Magenta
+      0x39ff14, // 500–549: Neon green
+      0xffd700, // 550–599: Gold
+      0x8a2be2, // 600–649: Blue violet
+      0x00ffff, // 650–699: Cyan
+      0xff4500, // 700–749: Red orange
+      0xff69b4, // 750–799: Bright pink
+      0x7b00ff, // 800–849: Electric violet
+      0x00ff7f, // 850–899: Spring green
+      0xffea00, // 900–949: Electric yellow
+      0xff0080, // 950–999: Neon pink
+    ];
+
     // animated grass
     this.grass = this.add.group();
 
@@ -310,6 +333,19 @@ export default class GameScene extends Phaser.Scene {
     });
   }
 
+  updateGrassColor() {
+    const colorIndex = Math.min(
+      Math.floor(this.score / 50),
+      this.grassColors.length - 1,
+    );
+
+    const color = this.grassColors[colorIndex];
+
+    this.grass.getChildren().forEach((grass) => {
+      grass.setTint(color);
+    });
+  }
+
   update(time, delta) {
     //update player
     this.player.update(this.cursors, delta);
@@ -363,6 +399,7 @@ export default class GameScene extends Phaser.Scene {
       if (obstacle.y + obstacle.height < 0) {
         this.score += 1;
         this.scoreText.setText("Score: " + this.score);
+        this.updateGrassColor();
 
         if (this.score % 5 === 0 && this.lastScoreUpdate !== this.score) {
           this.lastScoreUpdate = this.score;
