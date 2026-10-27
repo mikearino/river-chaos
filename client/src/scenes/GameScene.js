@@ -203,6 +203,18 @@ export default class GameScene extends Phaser.Scene {
     this.player.play("row_slow");
     this.player.setScale(1.5);
 
+    const rockBoat = () => {
+      this.tweens.add({
+        targets: this.player,
+        angle: Phaser.Math.Between(-25, 25),
+        duration: Phaser.Math.Between(400, 1000),
+        ease: "Sine.easeInOut",
+        onComplete: rockBoat,
+      });
+    };
+
+    rockBoat();
+
     // scoring
     this.score = 0;
 
@@ -219,6 +231,9 @@ export default class GameScene extends Phaser.Scene {
       color: "#000",
     });
 
+    this.scoreText.setColor("#ffffff");
+    this.scoreText.setStroke("#000000", 4);
+
     // hearts
     this.hearts = [];
 
@@ -226,6 +241,7 @@ export default class GameScene extends Phaser.Scene {
       const heart = this.add.image(25 + i * 40, 80, "heart");
       heart.setScrollFactor(0);
       heart.setScale(0.75);
+      heart.preFX.addGlow(0xffffff, 2, 0, false, 0.1, 4);
       this.hearts.push(heart);
     }
 
