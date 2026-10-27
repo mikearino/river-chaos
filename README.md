@@ -135,3 +135,23 @@ Server runs on:
 ```txt
 http://localhost:3000
 ```
+
+
+## API request protections
+
+- `POST /api/runs`: 10 requests per minute per IP, including invalid submissions.
+- `GET /api/leaderboard` and `GET /api/players/:playerId/stats`: share a budget of 120 requests per minute per IP.
+- Excess requests return JSON with HTTP `429`, `Retry-After`, and rate-limit headers. Read and write budgets are independent.
+- Runs require a UUID v4 player ID (matching the game's `crypto.randomUUID()`), exactly three ASCII letters for initials, an integer score from 0–2,147,483,647, and a finite duration greater than zero and no greater than 2,147,483,647 milliseconds. Fractional durations are accepted and rounded to the nearest millisecond, with a minimum stored value of 1. Initials are uppercased.
+- Leaderboard `limit` defaults to 10 when omitted. If supplied, it must be a decimal integer from 1–50 without leading zeros. Duplicate, bracket-style, and unknown query parameters are rejected.
+- Invalid fields or malformed JSON return `400`; JSON bodies over 2 KiB return `413`; unsupported content types/encodings return `415`. Unexpected server failures return a generic `500`.
+
+The limiter uses process-local memory. Restarting resets counters; multiple processes or instances each have independent budgets. Use a shared limiter store for deployment-wide enforcement. IPv6 clients are grouped using the library's default /56 subnet policy.
+
+Express trusts only its immediate IPv4 loopback nginx hop. Beanstalk prebuild hooks generate nginx real-IP configuration from validated official CloudFront origin-facing ranges. Deploy the application and proxy configuration together; see [deployment instructions](server/DEPLOYMENT.md). Clients sharing a public IP share a budget, and distributed attackers can evade per-IP limits.
+
+Validation and rate limiting do not authenticate players or prove scores were earned. Plausible fabricated scores and player impersonation remain possible.
+
+Run API integration tests with `cd server && npm test`. Tests use temporary localhost servers and a mocked service; they do not connect to MySQL or production.
+
+Database TLS behavior, required environment variables, and deployment bundle requirements are documented in [server/DEPLOYMENT.md](server/DEPLOYMENT.md).
