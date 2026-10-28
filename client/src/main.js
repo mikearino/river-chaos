@@ -1,3 +1,4 @@
+import "./style.css";
 import Phaser, { Physics } from "phaser";
 import GameScene from "./scenes/GameScene";
 import StartScene from "./scenes/StartScene";
@@ -6,6 +7,7 @@ import LeaderboardScoreScene from "./scenes/LeaderboardScene";
 
 const config = {
   type: Phaser.AUTO,
+  parent: "app",
   width: 1280,
   height: 720,
   backgroundColor: "#a8e518",

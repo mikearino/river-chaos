@@ -35,7 +35,14 @@ export default class StartScene extends Phaser.Scene {
 
     // store objects to hide them later
     this.titleText = this.add
-      .text(640, 300, "River Chaos", { fontSize: "64px", color: "#000" })
+      .text(640, 300, "RIVER CHAOS", {
+        fontFamily: "monospace",
+        fontSize: "72px",
+        fontStyle: "bold",
+        color: "#164b70",
+        stroke: "#000000",
+        strokeThickness: 6,
+      })
       .setOrigin(0.5);
 
     this.promptText = this.add
@@ -46,8 +53,11 @@ export default class StartScene extends Phaser.Scene {
       .setOrigin(0.5);
     this.insructionsText = this.add
       .text(640, 355, "Use the Arrow Keys to Play", {
-        fontSize: "32px",
-        color: "#000",
+        fontFamily: "monospace",
+        fontSize: "28px",
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 3,
       })
       .setOrigin(0.5);
 
