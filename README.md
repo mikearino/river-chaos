@@ -1,157 +1,104 @@
 # River Chaos
 
-River Chaos is a fast-paced browser arcade game built with Phaser.js.
+A full-stack browser arcade game: steer a rowboat through rocks and logs, survive the current, and submit your score to a persistent leaderboard.
 
-🕹️ **Play Now:** [riverchaos.com](https://www.riverchaos.com)
+**[Play River Chaos](https://www.riverchaos.com)** · Desktop keyboard controls
 
----
-
-## Overview
-
-River Chaos is a full-stack web application where player runs are persisted to a backend and displayed on a global leaderboard.
-
-The project focuses on integrating a real-time game with a production-style backend and cloud deployment.
-
----
-
-## Tech Stack
-
-### Frontend
-
-- Phaser 3
-- Vite
-- JavaScript (ES6)
-- HTML / CSS
-
-### Backend
-
-- Node.js
-- Express
-- REST API
-- MySQL (RDS)
-
-### Infrastructure
-
-- AWS S3 (static hosting)
-- AWS CloudFront (CDN + HTTPS)
-- AWS Elastic Beanstalk (API hosting)
-- AWS RDS (MySQL database)
-
----
+The project combines a Phaser game with a Node.js/Express API, MySQL persistence, and an AWS deployment architecture. Backend engineering includes parameterized SQL, input validation, request limits, verified database TLS, and proxy-aware client identification.
 
 ## Architecture
 
-```txt
-Browser (CloudFront)
-→ Frontend (S3)
-→ API (CloudFront)
-→ Express Server (Elastic Beanstalk)
-→ MySQL (RDS)
+```text
+Browser
+  ├─ HTTPS → CloudFront → S3: Vite-built game and assets
+  └─ HTTPS → CloudFront → Elastic Beanstalk (single instance)
+                           └─ nginx → Express → MySQL on RDS
+                                                verified TLS
 ```
 
----
+The frontend uses a configurable API URL. Express separates HTTP routes from database services, while `mysql2` provides connection pooling. The documented backend target is Node.js 24 on Amazon Linux 2023, with nginx forwarding to Express on port 8080. AWS resources are not provisioned by this repository; deployment requirements are documented in [server/DEPLOYMENT.md](server/DEPLOYMENT.md).
 
-## Gameplay
+## Tech stack
 
-- Use arrow keys to steer the rowboat
-- Survive as long as possible
-- Score increases as obstacles pass
-- Submit initials to the leaderboard at the end of a run
-- Leaderboard is persisted via backend API
+| Layer | Technologies |
+| --- | --- |
+| Game client | JavaScript ES modules, Phaser 3, Arcade Physics, Vite, HTML/CSS |
+| API | Node.js, Express 5, express-rate-limit |
+| Persistence | MySQL, mysql2 connection pooling, UUID run identifiers |
+| Hosting | Amazon S3, CloudFront, Elastic Beanstalk, RDS MySQL |
+| Verification | Node.js test runner, Python unittest, local TLS fixtures, optional nginx integration tests |
 
----
+## Gameplay and presentation
 
-## API Overview
+- **Controls:** Space starts; Left/Right steer and Up rows against the downward drift. Enter submits three-letter initials after a run; Space returns to the start screen afterward.
+- **Survival:** Five hearts, collision knockback, flashing damage feedback, and a temporary collision cooldown. Losing all hearts or leaving the screen vertically ends the run.
+- **Obstacles:** Random rocks drawn from 12 sprite variations, spinning logs, and occasional bursts. Spawn intervals shorten and burst size increases as the score rises. Each obstacle that passes offscreen adds a point.
+- **Animation:** Scrolling water, a rocking boat, slow/fast rowing, and waving grass with randomized animation phases and periodically changing wind speed.
+- **Dynamic grass colors:** The banks advance through a tint palette every 50 points, retaining the final color at higher scores.
+- **Audio and scores:** Scene-specific music and collision sounds; the start screen cycles between instructions and high scores. Anonymous player UUIDs persist in localStorage, and failed score submissions can be retried.
 
-### GET `/api/leaderboard`
+## API and database
 
-Returns top runs sorted by score.
+| Endpoint | Behavior |
+| --- | --- |
+| `POST /api/runs` | Saves a run and returns its generated ID with HTTP `201`. |
+| `GET /api/leaderboard?limit=10` | Returns each player's best score, preferring the earliest run on a score tie. Limit defaults to 10 and accepts 1–50. |
+| `GET /api/players/:playerId/stats` | Returns run count, best/average score, and total playtime. |
+| `GET /health` | Checks HTTP-server availability; does not check database connectivity. |
 
-Optional:
+Run submissions contain `playerId` (UUID v4), `initials` (three ASCII letters), `score` (nonnegative integer), and `durationMs` (positive finite number). Scores and durations are bounded to the signed MySQL INT range; initials are uppercased and fractional durations rounded before storage.
 
-```txt
-/api/leaderboard?limit=10
+Parameterized queries operate on an existing `runs` table with `id`, `player_id`, `initials`, `score`, `duration_ms`, and `created_at` columns. The repository does not include database creation scripts or migrations.
+
+## Security measures and limits
+
+- Separate per-IP budgets: **10 submissions/minute** and **120 leaderboard/statistics reads/minute**, including invalid requests. Excess requests return `429` with retry information.
+- A **2 KiB JSON body limit**, strict field/query validation, explicit client-error responses, and generic server-error responses. Dependency fixes include body-parser 2.4.0 and proxy-addr 2.0.8.
+- Remote database connections require **TLS 1.2 or later**, certificate-chain verification against the bundled official AWS RDS CA certificates, and hostname verification, without plaintext fallback.
+- Beanstalk prebuild hooks validate official AWS `CLOUDFRONT_ORIGIN_FACING` ranges and generate nginx real-IP configuration. Express trusts only the immediate IPv4 loopback nginx hop; deploy the API and nginx changes together.
+- Credentials come from environment variables; `.env*` files are ignored by Git.
+
+Counters are process-local and reset on restart. Anonymous IDs are not authentication, and submitted scores are not server-verified gameplay. CloudFront trust ranges refresh during deployments and require periodic review. These measures describe the implementation, not an independent assessment of the running AWS configuration.
+
+## Local development
+
+Use **Node.js 24**, npm, and local MySQL. Create the application database and `runs` table first; there is no automatic schema setup.
+
+Create an untracked `server/.env` with your local credentials:
+
+```dotenv
+DB_HOST=localhost
+DB_USER=your_local_database_user
+DB_PASSWORD=your_local_database_password
+DB_NAME=your_database_name
+NODE_ENV=development
+PORT=3000
 ```
 
----
-
-### POST `/api/runs`
-
-Creates a new run entry.
-
-```json
-{
-  "playerId": "uuid",
-  "initials": "AAA",
-  "score": 25,
-  "durationMs": 14763
-}
-```
-
----
-
-## Database Schema
-
-**Table: `runs`**
-
-- `id` UUID, primary key
-- `player_id` string
-- `initials` char(3)
-- `score` int
-- `duration_ms` int
-- `created_at` timestamp
-
----
-
-## Challenges & Learnings
-
-- Resolving HTTPS / mixed content issues between frontend and backend
-- Configuring CloudFront to proxy API requests correctly
-- Managing environment variables across development and production
-- Designing a leaderboard system based on best score per player
-
----
-
-## Local Development
-
-### Client
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-### Server
+Start the API:
 
 ```bash
 cd server
-npm install
-node index.js
+npm ci
+npm start
 ```
 
-Server runs on:
+In a second terminal, create `client/.env` containing `VITE_API_URL=http://localhost:3000/api`, then run:
 
-```txt
-http://localhost:3000
+```bash
+cd client
+npm ci
+npm run dev
 ```
 
+Open the URL printed by Vite. Only non-production loopback database connections may use plaintext; connecting to RDS locally still requires verified TLS. `VITE_*` values are public frontend configuration and must not contain secrets.
 
-## API request protections
+## Tests and deployment
 
-- `POST /api/runs`: 10 requests per minute per IP, including invalid submissions.
-- `GET /api/leaderboard` and `GET /api/players/:playerId/stats`: share a budget of 120 requests per minute per IP.
-- Excess requests return JSON with HTTP `429`, `Retry-After`, and rate-limit headers. Read and write budgets are independent.
-- Runs require a UUID v4 player ID (matching the game's `crypto.randomUUID()`), exactly three ASCII letters for initials, an integer score from 0–2,147,483,647, and a finite duration greater than zero and no greater than 2,147,483,647 milliseconds. Fractional durations are accepted and rounded to the nearest millisecond, with a minimum stored value of 1. Initials are uppercased.
-- Leaderboard `limit` defaults to 10 when omitted. If supplied, it must be a decimal integer from 1–50 without leading zeros. Duplicate, bracket-style, and unknown query parameters are rejected.
-- Invalid fields or malformed JSON return `400`; JSON bodies over 2 KiB return `413`; unsupported content types/encodings return `415`. Unexpected server failures return a generic `500`.
+Run `cd server && npm test` for API validation, rate limiting, compressed-body regressions, TLS handshakes, and CloudFront configuration generation tests. Python 3 and OpenSSL are required. The native nginx integration test requires Linux with nginx and is skipped elsewhere. Tests use mocked services and local servers, without connecting to RDS.
 
-The limiter uses process-local memory. Restarting resets counters; multiple processes or instances each have independent budgets. Use a shared limiter store for deployment-wide enforcement. IPv6 clients are grouped using the library's default /56 subnet policy.
+- **Frontend:** Run `npm run build` in `client/`; publish `client/dist/` to the S3 origin served by CloudFront. The API URL is set at build time.
+- **Backend:** Package the contents of `server/` with `package.json` and `index.js` at the ZIP root. Include the complete `.platform/` directory, database modules, and `certs/global-bundle.pem`; exclude `.env`, `node_modules`, tests, and local artifacts. Beanstalk installs dependencies and runs `npm start` using its supplied `PORT`.
+- **Configuration:** Set `NODE_ENV=production` and `DB_HOST`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME`. Use the exact RDS DNS endpoint. Prebuild hooks require Python 3 and outbound verified HTTPS to AWS's public IP-range feed; download or validation failures abort deployment.
 
-Express trusts only its immediate IPv4 loopback nginx hop. Beanstalk prebuild hooks generate nginx real-IP configuration from validated official CloudFront origin-facing ranges. Deploy the application and proxy configuration together; see [deployment instructions](server/DEPLOYMENT.md). Clients sharing a public IP share a budget, and distributed attackers can evade per-IP limits.
-
-Validation and rate limiting do not authenticate players or prove scores were earned. Plausible fabricated scores and player impersonation remain possible.
-
-Run API integration tests with `cd server && npm test`. Tests use temporary localhost servers and a mocked service; they do not connect to MySQL or production.
-
-Database TLS behavior, required environment variables, and deployment bundle requirements are documented in [server/DEPLOYMENT.md](server/DEPLOYMENT.md).
+See the [backend deployment guide](server/DEPLOYMENT.md) for proxy assumptions, TLS requirements, range maintenance, and post-deployment checks. Changing GitHub source alone does not deploy the application.
