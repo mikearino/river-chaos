@@ -1,5 +1,5 @@
 import "./style.css";
-import Phaser, { Physics } from "phaser";
+import Phaser, { Physics, Renderer } from "phaser";
 import GameScene from "./scenes/GameScene";
 import StartScene from "./scenes/StartScene";
 import GameOverScene from "./scenes/GameOverScene";

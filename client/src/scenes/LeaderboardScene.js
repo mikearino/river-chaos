@@ -63,6 +63,9 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     // Create a normal HTML input so typing works naturally.
     this.createInitialsInput();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.removeInitialsInput();
+    });
   }
 
   createInitialsInput() {
@@ -95,6 +98,8 @@ export default class LeaderboardScene extends Phaser.Scene {
     document.body.appendChild(input);
     this.initialsInput = input;
     this.positionInput();
+    this.handleInputResize = () => this.positionInput();
+    window.addEventListener("resize", this.handleInputResize);
     input.focus();
 
     // Allow only 3 uppercase letters.
@@ -115,10 +120,17 @@ export default class LeaderboardScene extends Phaser.Scene {
   positionInput() {
     if (!this.initialsInput) return;
 
-    // Put input near top-center of the game canvas.
     const canvasRect = this.game.canvas.getBoundingClientRect();
+    const scale = canvasRect.height / this.game.config.height;
+
     this.initialsInput.style.left = `${canvasRect.left + canvasRect.width / 2}px`;
-    this.initialsInput.style.top = `${canvasRect.top + 190}px`;
+
+    this.initialsInput.style.top = `${canvasRect.top + 190 * scale + window.scrollY}px`;
+
+    this.initialsInput.style.width = `${200 * scale}px`;
+    this.initialsInput.style.height = `${56 * scale}px`;
+    this.initialsInput.style.fontSize = `${30 * scale}px`;
+
     this.initialsInput.style.transform = "translate(-50%, -50%)";
   }
 
@@ -165,10 +177,16 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   removeInitialsInput() {
+    if (this.handleInputResize) {
+      window.removeEventListener("resize", this.handleInputResize);
+      this.handleInputResize = null;
+    }
+
     if (this.initialsInput) {
       this.initialsInput.remove();
       this.initialsInput = null;
     }
+
     this.isSubmitting = false;
   }
 

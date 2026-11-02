@@ -202,7 +202,7 @@ export default class GameScene extends Phaser.Scene {
     );
     this.player.play("row_slow");
     this.player.setScale(1.5);
-
+    this.textures.get("rowboat").setFilter(Phaser.Textures.FilterMode.NEAREST);
     const rockBoat = () => {
       this.tweens.add({
         targets: this.player,
